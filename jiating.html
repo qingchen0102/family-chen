@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家庭人员介绍</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            dad: '#1E40AF',
+            mom: '#DB2777',
+            haun: '#059669',
+            otheping: '#D97706',
+            cai:'#8B7289',
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <!-- 顶部导航 -->
+  <header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex items-center gap-2">
+      <i class="fa fa-users text-primary text-2xl"></i>
+      <h1 class="text-2xl font-bold text-gray-800">家庭人员介绍</h1>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="familyList"></div>
+  </main>
+
+  <!-- 详细信息弹窗 -->
+  <div id="detailModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative">
+      <button id="closeModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800" title="关闭弹窗" onclick="closeDetail()">
+        <i class="fa fa-times text-xl"></i>
+      </button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // 家庭人员数据
+    let familyMembers = [
+      {
+        id: 1,
+        name: "郎凤学",
+        role: "父亲",
+        color: "dad",
+        resume: "• 就职于XX公司,担任工程师\n• 擅长维修家电、木工手艺\n• 爱好钓鱼、下棋",
+        detail: {
+          age: "xx岁",
+          birthday: "xx年xx月xx日",
+          job: "农民",
+          hobby: "种地骑摩托",
+          contact: "138****1234",
+          address: "双太村五组",
+          achievement: "三个孩子"
+        }
+      },
+      {
+        id: 2,
+        name: "高亚芝",
+        role: "母亲",
+        color: "mom",
+        resume: "• 全职家庭主妇，兼顾照顾全家\n• 擅长烹饪、收纳整理\n• 爱好养花、跳广场舞",
+        detail: {
+          age: "46岁",
+          birthday: "1979年8月15日",
+          job: "家庭主妇",
+          hobby: "养花、跳广场舞、追剧",
+          contact: "139****5678",
+          address: "XX小区3栋2单元501室",
+          achievement: "把家里打理得井井有条，拿手菜：红烧肉、糖醋排骨"
+        }
+      },
+        {
+        id: 3,
+        name: "郎欢欢",
+        role: "母亲",
+        color: "huan",
+        resume: "• 全职家庭主妇，兼顾照顾全家\n• 擅长烹饪、收纳整理\n• 爱好养花、跳广场舞",
+        detail: {
+          age: "46岁",
+          birthday: "1979年8月15日",
+          job: "家庭主妇",
+          hobby: "养花、跳广场舞、追剧",
+          contact: "139****5678",
+          address: "XX小区3栋2单元501室",
+          achievement: "把家里打理得井井有条，拿手菜：红烧肉、糖醋排骨"
+        }
+      },
+        {
+        id: 4,
+        name: "高亚芝",
+        role: "母亲",
+        color: "mom",
+        resume: "• 全职家庭主妇，兼顾照顾全家\n• 擅长烹饪、收纳整理\n• 爱好养花、跳广场舞",
+        detail: {
+          age: "46岁",
+          birthday: "1979年8月15日",
+          job: "家庭主妇",
+          hobby: "养花、跳广场舞、追剧",
+          contact: "139****5678",
+          address: "XX小区3栋2单元501室",
+          achievement: "把家里打理得井井有条，拿手菜：红烧肉、糖醋排骨"
+        }
+      },
+      {
+        id: 5,
+        name: "111",
+        role: "22",
+        color: "",
+        resume: "• 全职家庭主，兼顾照全家\n• 长烹饪、收纳整理\n• 爱好养花、跳广场舞",
+        detail:{
+          age: "4岁",
+          birthday: "179年4月22日",
+          job: "家庭主妇",
+          hobby: "养花、跳广场舞、追剧",
+          contact: "139****5678",
+          address: "XX小区3栋2元501室",
+          achievement: "把家里理得井井有条，拿手菜：红烧肉、糖醋排骨"
+        }
+      }
+    
+    
+    ];
+
+    // 渲染成员列表
+    const familyList = document.getElementById('familyList');
+    function renderFamily() {
+      familyList.innerHTML = '';
+      familyMembers.forEach(member => {
+        const memberCard = document.createElement('div');
+        memberCard.className = `bg-white rounded-xl shadow-lg p-6 card-hover border-t-4 border-${member.color}`;
+        memberCard.innerHTML = `
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800 cursor-pointer" onclick="toggleResume(${member.id})">
+              <i class="fa fa-user-circle text-${member.color} mr-2"></i>${member.name}
+              <span class="text-sm text-gray-500 ml-2">(${member.role})</span>
+            </h2>
+            <i class="fa fa-chevron-down text-gray-400 transition-transform duration-300" id="icon-${member.id}"></i>
+          </div>
+          <div class="resume-content hidden mt-4 text-gray-600 whitespace-pre-line" id="resume-${member.id}">
+            ${member.resume}
+            <div class="mt-4">
+              <button class="px-4 py-2 bg-${member.color} text-white rounded-lg hover:bg-${member.color}/90 transition" onclick="openDetail(${member.id})">
+                查看详细信息
+              </button>
+            </div>
+          </div>
+        `;
+        familyList.appendChild(memberCard);
+      });
+    }
+
+    // 展开/折叠履历
+    function toggleResume(id) {
+      const resumeEl = document.getElementById(`resume-${id}`);
+      const iconEl = document.getElementById(`icon-${id}`);
+      if (resumeEl && iconEl) {
+        resumeEl.classList.toggle('hidden');
+        iconEl.classList.toggle('rotate-180');
+      }
+    }
+
+    // 打开详情弹窗
+    const detailModal = document.getElementById('detailModal');
+    const modalContent = document.getElementById('modalContent');
+
+    function openDetail(id) {
+      const member = familyMembers.find(m => m.id === id);
+      if (!member) return;
+      modalContent.innerHTML = `
+        <h2 class="text-2xl font-bold text-${member.color} mb-4">${member.name}（${member.role}）</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-500 mb-1">年龄</p >
+            <p class="font-medium">${member.detail.age}</p >
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-500 mb-1">生日</p >
+            <p class="font-medium">${member.detail.birthday}</p >
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-500 mb-1">职业</p >
+            <p class="font-medium">${member.detail.job}</p >
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-500 mb-1">爱好</p >
+            <p class="font-medium">${member.detail.hobby}</p >
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-500 mb-1">联系方式</p >
+            <p class="font-medium">${member.detail.contact}</p >
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-500 mb-1">住址</p >
+            <p class="font-medium">${member.detail.address}</p >
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg md:col-span-2">
+            <p class="text-sm text-gray-500 mb-1">个人成就/亮点</p >
+            <p class="font-medium">${member.detail.achievement}</p >
+          </div>
+        </div>
+      `;
+      detailModal.classList.remove('hidden');
+    }
+
+    // 关闭详情弹窗
+    function closeDetail() {
+      detailModal.classList.add('hidden');
+    }
+
+    // 点击弹窗背景关闭
+    detailModal.addEventListener('click', (e) => {
+      if (e.target === detailModal) {
+        closeDetail();
+      }
+    });
+
+    // 初始化渲染
+    renderFamily();
+  </script>
+</body>
+</html>
